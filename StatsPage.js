@@ -1,10 +1,12 @@
+import AsyncStorage from '@react-native-community/async-storage';
 import Checkbox from 'expo-checkbox';
 import React, { useState } from 'react';
 import { ScrollView, View, Text, TextInput, Dimensions, StyleSheet } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export default function StatsPage({ habits, setHabits }) {
-	function Habit({ title, currentStreak, longestStreak, total, missedDays, edit }) {
+	console.log('habis', habits);
+	function Habit({ title, currentStreak, longestStreak, total, missed, checked, edit }) {
 		return (
 			<View
 				style={{
@@ -22,7 +24,9 @@ export default function StatsPage({ habits, setHabits }) {
 						marginLeft: 15,
 					}}
 				>
-					<Text style={{ fontSize: 20, margin: 10 }}>{title}</Text>
+					<Checkbox color={'black'} style={{ margin: 3, position: 'absolute', top: 0, right: 0, height: 10, width: 10 }} value={checked} />
+
+					<Text style={{ fontSize: 16, margin: 10 }}>{title}</Text>
 					<View
 						style={{
 							flexDirection: 'row',
@@ -41,8 +45,8 @@ export default function StatsPage({ habits, setHabits }) {
 						<Text onPress={() => edit({ total: total + 1 })} style={{ fontSize: 16, padding: 10, marginHorizontal: 10 }}>
 							{total ?? '0s'}
 						</Text>
-						<Text onPress={() => edit({ missedDays: missedDays + 1 })} style={{ fontSize: 16, padding: 10, marginHorizontal: 10 }}>
-							{missedDays ?? 0}
+						<Text onPress={() => edit({ missed: missed + 1 })} style={{ fontSize: 16, padding: 10, marginHorizontal: 10 }}>
+							{missed ?? 0}
 						</Text>
 					</View>
 				</View>
@@ -53,20 +57,23 @@ export default function StatsPage({ habits, setHabits }) {
 	function editHabit(index, updateArray) {
 		let newList = [...habits];
 		newList[index] = { ...newList[index], ...updateArray };
-		setHabits(newList);
-		return true;
-	}
 
+		// Update the state and AsyncStorage
+		setHabits(newList);
+		AsyncStorage.setItem('habits', JSON.stringify(newList)).catch((error) => {
+			console.error('Error saving data', error);
+		});
+	}
 	return (
 		<ScrollView style={{ flex: 1, height: height - 50, marginTop: 50, width: width }}>
-			<Text style={{ fontSize: 40, marginLeft: 15 }}>Historical</Text>
+			<Text style={{ fontSize: 40, marginLeft: 15 }}>Progress</Text>
 			<View
 				style={{
 					flexDirection: 'row',
 					position: 'absolute',
 					right: 40,
 					top: 40,
-					width: width * 0.48,
+					width: width * 0.5,
 					justifyContent: 'space-evenly',
 				}}
 			>
@@ -83,7 +90,8 @@ export default function StatsPage({ habits, setHabits }) {
 						currentStreak={item.currentStreak ?? 0}
 						longestStreak={item.longestStreak ?? 0}
 						total={item.total ?? 0}
-						missedDays={item.missedDays ?? 0}
+						missed={item.missed ?? 0}
+						checked={item.checked}
 						edit={(update) => editHabit(index, update)}
 					></Habit>
 				);
