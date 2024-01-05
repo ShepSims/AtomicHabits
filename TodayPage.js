@@ -2,6 +2,9 @@ import AsyncStorage from '@react-native-community/async-storage';
 import Checkbox from 'expo-checkbox';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, TextInput, Dimensions, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
+import { ref, set } from 'firebase/database';
+import { db } from './firebaseConfig';
+
 const { width, height } = Dimensions.get('window');
 
 export default function TodayPage({ habits, setHabits }) {
@@ -322,8 +325,20 @@ export default function TodayPage({ habits, setHabits }) {
 			<TouchableOpacity onPress={setLastCheckedDateToThreeDaysAgo} style={styles.testButton}>
 				<Text>Set Last Checked Date to 3 Days Ago</Text>
 			</TouchableOpacity>
+
 			<TouchableOpacity onPress={() => setLastResetDateToPast(3)} style={styles.testButton}>
 				<Text>Set Last Reset Date to 3 Days Ago</Text>
+			</TouchableOpacity>
+
+			<TouchableOpacity
+				onPress={() => {
+					set(ref(db, 'users/'), {
+						username: 'test',
+					});
+				}}
+				style={styles.testButton}
+			>
+				<Text>Test push to db</Text>
 			</TouchableOpacity>
 			<NewHabit></NewHabit>
 			<ResetModal isVisible={isModalVisible} summary={resetSummary} onClose={() => setIsModalVisible(false)} />
